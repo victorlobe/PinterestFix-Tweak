@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="120" height="120" alt="PinterestFix" src="http://storage.server.victorlobe.me/Cydia/packageIcons/PinterestFixIcon.png" />
+  <img width="120" height="120" alt="PinterestFix" src="https://storage.victorlobe.me/Cydia/packageIcons/PinterestFixIcon.png" />
 </p>
 
 <h1 align="center">PinterestFix</h1>
