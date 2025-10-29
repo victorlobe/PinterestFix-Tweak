@@ -49,7 +49,7 @@
 
 4. Respring your device
 
-## Version History
+## Changelog
 
 ### v1.0.1
 - Fixed a bug that caused the SpringBoard to crash
