@@ -21,7 +21,8 @@
 ## Features
 
 - Automatically fixes Pinterest crashes on iOS 5+
-- Modifies CFBundleVersion and CFBundleShortVersionString to "13.28"
+- Modifies CFBundleVersion and CFBundleShortVersionString to empty strings
+- Blocks update alerts that appear on app launch
 - Supports multiple Pinterest bundle identifiers since there are some versions with weird bundle identifiers
 - The tweak remembers if Pinterest is already fixed to avoid unnecessary scans
 
@@ -51,6 +52,10 @@
 
 ## Changelog
 
+### v1.0.2
+- PinterestFix works again! Pinterest changed something on their end which broke the previous fix. In this version, the tweak modifies the version strings to empty strings instead of a specific version number.
+- Update alerts are now automatically blocked.
+
 ### v1.0.1
 - Fixed a bug that caused the SpringBoard to crash
 - Fixed an issue where Pinterest sometimes wasn't patched
@@ -65,12 +70,13 @@
 
 ## Behind the Scenes
 
-The tweak runs in SpringBoard and proactively scans for Pinterest installations on launch. It automatically modifies the Info.plist file to set both `CFBundleVersion` and `CFBundleShortVersionString` to "13.28", which prevents Pinterest from crashing on iOS 5+.
+The tweak runs in SpringBoard and proactively scans for Pinterest installations on launch. It automatically modifies the Info.plist file to set both `CFBundleVersion` and `CFBundleShortVersionString` to empty strings, which prevents Pinterest from crashing on iOS 5+. Additionally, it blocks update alerts that would normally appear when launching Pinterest.
 
 ## Credits
 
-This tweak is based on a manual fix tutorial that was originally shared in a Discord group. The method involved manually editing Pinterest's Info.plist file with iFile to change the version strings to "13.28".  
-I DMed the creator, but he didn’t respond. If he wants, I’ll gladly mention him here.
+This tweak is based on a manual fix tutorial that was originally shared in a Discord group. The method involved manually editing Pinterest's Info.plist file with iFile to change the version number. 
+I DMed the creator, but he didn't respond. If he wants, I'll gladly mention him here.
+In the latest update, I've replaced the version strings with empty strings since the old method didn't work anymore. 
 
 ## Author
 

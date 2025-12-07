@@ -29,7 +29,7 @@ BOOL verifyPinterestFix() {
         NSString *currentVersion = [infoDict objectForKey:@"CFBundleVersion"];
         NSString *currentShortVersion = [infoDict objectForKey:@"CFBundleShortVersionString"];
         
-        if ([currentVersion isEqualToString:@"13.28"] && [currentShortVersion isEqualToString:@"13.28"]) {
+        if ([currentVersion isEqualToString:@""] && [currentShortVersion isEqualToString:@""]) {
             NSLog(@"[PinterestFix] Previously fixed Pinterest still has correct versions");
             return YES;
         } else {
@@ -107,7 +107,7 @@ void findAndFixPinterest() {
                     NSString *currentShortVersion = [infoDict objectForKey:@"CFBundleShortVersionString"];
                     NSLog(@"[PinterestFix] Current versions - Version: %@, Short: %@", currentVersion, currentShortVersion);
                     
-                    if ([currentVersion isEqualToString:@"13.28"] && [currentShortVersion isEqualToString:@"13.28"]) {
+                    if ([currentVersion isEqualToString:@""] && [currentShortVersion isEqualToString:@""]) {
                         NSLog(@"[PinterestFix] Pinterest already fixed at: %@", infoPlistPath);
                         // Mark this specific Pinterest installation as fixed
                         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -121,8 +121,8 @@ void findAndFixPinterest() {
                     // Apply the fix
                     NSLog(@"[PinterestFix] Applying fix to Pinterest Info.plist");
                     NSMutableDictionary *mutableInfoDict = [infoDict mutableCopy];
-                    [mutableInfoDict setObject:@"13.28" forKey:@"CFBundleVersion"];
-                    [mutableInfoDict setObject:@"13.28" forKey:@"CFBundleShortVersionString"];
+                    [mutableInfoDict setObject:@"" forKey:@"CFBundleVersion"];
+                    [mutableInfoDict setObject:@"" forKey:@"CFBundleShortVersionString"];
                     
                     BOOL success = [mutableInfoDict writeToFile:infoPlistPath atomically:YES];
                     if (success) {
@@ -134,7 +134,7 @@ void findAndFixPinterest() {
                     // Mark this specific Pinterest installation as fixed
                     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
                     [defaults setObject:infoPlistPath forKey:@"PinterestFixPath"];
-                    [defaults setObject:@"13.28" forKey:@"PinterestFixVersion"];
+                    [defaults setObject:@"" forKey:@"PinterestFixVersion"];
                     [defaults setBool:YES forKey:@"PinterestFixApplied"];
                     [defaults synchronize];
                     return;
@@ -166,7 +166,7 @@ void findAndFixPinterest() {
                                     NSString *currentShortVersion = [appInfoDict objectForKey:@"CFBundleShortVersionString"];
                                     NSLog(@"[PinterestFix] App bundle versions - Version: %@, Short: %@", currentVersion, currentShortVersion);
                                     
-                                    if ([currentVersion isEqualToString:@"13.28"] && [currentShortVersion isEqualToString:@"13.28"]) {
+                                    if ([currentVersion isEqualToString:@""] && [currentShortVersion isEqualToString:@""]) {
                                         NSLog(@"[PinterestFix] Pinterest app bundle already fixed at: %@", appInfoPlistPath);
                                         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
                                         [defaults setObject:appInfoPlistPath forKey:@"PinterestFixPath"];
@@ -178,8 +178,8 @@ void findAndFixPinterest() {
                                     
                                     NSLog(@"[PinterestFix] Applying fix to Pinterest app bundle Info.plist");
                                     NSMutableDictionary *mutableInfoDict = [appInfoDict mutableCopy];
-                                    [mutableInfoDict setObject:@"13.28" forKey:@"CFBundleVersion"];
-                                    [mutableInfoDict setObject:@"13.28" forKey:@"CFBundleShortVersionString"];
+                                    [mutableInfoDict setObject:@"" forKey:@"CFBundleVersion"];
+                                    [mutableInfoDict setObject:@"" forKey:@"CFBundleShortVersionString"];
                                     
                                     BOOL success = [mutableInfoDict writeToFile:appInfoPlistPath atomically:YES];
                                     if (success) {
@@ -190,7 +190,7 @@ void findAndFixPinterest() {
                                     
                                     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
                                     [defaults setObject:appInfoPlistPath forKey:@"PinterestFixPath"];
-                                    [defaults setObject:@"13.28" forKey:@"PinterestFixVersion"];
+                                    [defaults setObject:@"" forKey:@"PinterestFixVersion"];
                                     [defaults setBool:YES forKey:@"PinterestFixApplied"];
                                     [defaults synchronize];
                                     return;
@@ -213,10 +213,52 @@ void findAndFixPinterest() {
     
     NSLog(@"[PinterestFix] SpringBoard launched, applying Pinterest fix...");
     
-    // Apply fix immediately on SpringBoard launch
     findAndFixPinterest();
     
     NSLog(@"[PinterestFix] Pinterest fix scan completed");
+}
+
+%end
+
+// Quick and dirty fix for the update alert
+
+%hook UIAlertView
+
+- (id)initWithTitle:(NSString *)title message:(NSString *)message delegate:(id)delegate cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSString *)otherButtonTitles, ... {
+    NSString *lowercaseTitle = title ? [title lowercaseString] : @"";
+    NSString *lowercaseMessage = message ? [message lowercaseString] : @"";
+    
+    if ([lowercaseTitle rangeOfString:@"update"].location != NSNotFound ||
+        [lowercaseMessage rangeOfString:@"update"].location != NSNotFound ||
+        [lowercaseTitle rangeOfString:@"verfügbar"].location != NSNotFound ||
+        [lowercaseMessage rangeOfString:@"verfügbar"].location != NSNotFound ||
+        [lowercaseTitle rangeOfString:@"available"].location != NSNotFound ||
+        [lowercaseMessage rangeOfString:@"available"].location != NSNotFound) {
+        NSLog(@"[PinterestFix] Blocking update alert: %@ - %@", title ?: @"", message ?: @"");
+        UIAlertView *alert = %orig(@"", @"", nil, nil, nil);
+        return alert;
+    }
+    
+    return %orig;
+}
+
+- (void)show {
+    NSString *title = self.title ?: @"";
+    NSString *message = self.message ?: @"";
+    NSString *lowercaseTitle = [title lowercaseString];
+    NSString *lowercaseMessage = [message lowercaseString];
+    
+    if ([lowercaseTitle rangeOfString:@"update"].location != NSNotFound ||
+        [lowercaseMessage rangeOfString:@"update"].location != NSNotFound ||
+        [lowercaseTitle rangeOfString:@"verfügbar"].location != NSNotFound ||
+        [lowercaseMessage rangeOfString:@"verfügbar"].location != NSNotFound ||
+        [lowercaseTitle rangeOfString:@"available"].location != NSNotFound ||
+        [lowercaseMessage rangeOfString:@"available"].location != NSNotFound) {
+        NSLog(@"[PinterestFix] Blocking update alert from showing: %@ - %@", title, message);
+        return;
+    }
+    
+    %orig;
 }
 
 %end
