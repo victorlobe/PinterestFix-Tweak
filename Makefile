@@ -3,6 +3,22 @@ TARGET := iphone:7.1
 
 INSTALL_TARGET_PROCESSES = Pinterest
 
+# Force Xcode 26: the Xcode 27 linker drops the Thumb bit from armv7 __mod_init_func
+# pointers, so the dylib crashes in dyld on iOS 6.
+XCODE26_APP ?= /Applications/Xcode 26.6.app
+XCODE26_LINK := $(CURDIR)/.theos/Xcode26.app
+$(shell mkdir -p "$(CURDIR)/.theos" && ln -sfn "$(XCODE26_APP)" "$(XCODE26_LINK)")
+export DEVELOPER_DIR := $(XCODE26_LINK)/Contents/Developer
+MAKE := $(DEVELOPER_DIR)/usr/bin/make
+_PF_TC := $(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/bin
+TARGET_CC := $(_PF_TC)/clang
+TARGET_CXX := $(_PF_TC)/clang++
+TARGET_LD := $(_PF_TC)/clang
+TARGET_LIPO := $(_PF_TC)/lipo
+TARGET_STRIP := $(_PF_TC)/strip
+TARGET_DSYMUTIL := $(_PF_TC)/dsymutil
+TARGET_CODESIGN_ALLOCATE := $(_PF_TC)/codesign_allocate
+export TARGET_CC TARGET_CXX TARGET_LD TARGET_LIPO TARGET_STRIP TARGET_DSYMUTIL TARGET_CODESIGN_ALLOCATE
 
 include $(THEOS)/makefiles/common.mk
 
@@ -39,7 +55,7 @@ dev-pipeline:
 		BASE="$$(basename "$$DEB" .deb)"; TMP="$${BASE#*_}"; VERSION="$${TMP%_*}"; \
 		echo "[ℹ️ ] Version: $$VERSION"; \
 		echo "[📦] Git commit…"; \
-		git add -A; \
+		git add -u; \
 		if git commit -m "Build $$VERSION"; then echo "[✅] Commit successful"; else echo "[⚠️ ] Nothing to commit"; fi; \
 		DEST="/Volumes/victor/Sites/repo-dev/debs"; \
 		echo "[📂] Copy .deb → $$DEST"; \
@@ -65,9 +81,11 @@ release-pipeline:
 	BASE="$$(basename "$$DEB" .deb)"; TMP="$${BASE#*_}"; VER="$${TMP%_*}"; \
 	echo "[🚀 RELEASE] Built $$DEB (Version: $$VER)"; \
 	echo "[ℹ️ ] (Release mode: no deploy; just committing)"; \
-	git add -A || true; \
+	git add -u || true; \
 	if git commit -m "Release $$VER"; then \
 		echo "[✅] Git commit: Release $$VER"; \
 	else \
 		echo "[⚠️ ] Nothing to commit"; \
 	fi;'
+SUBPROJECTS += PinterestFixPrefs
+include $(THEOS_MAKE_PATH)/aggregate.mk
