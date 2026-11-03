@@ -60,8 +60,10 @@ The "Likes" tab on your profile stays empty, since Pinterest no longer keeps a l
 
 ## Changelog
 
-### v2
+### v2.0.1
+- Fixes an issue where Pinterest 3.8.1 could crash after entering four characters in the search field.
 
+### v2
 **New**
 - Settings page in Settings.app
   - Hide promoted pins
