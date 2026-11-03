@@ -375,6 +375,53 @@ static NSDictionary *pinterestFixCommentsFromAggregatedComments(NSDictionary *re
 }
 
 
+//Fix 3.8.1 search
+static NSArray *pinterestFixTypedItems(NSArray *items) {
+    NSMutableArray *typedItems = nil;
+    NSUInteger count = [items count];
+
+    for (NSUInteger i = 0; i < count; i++) {
+        id item = [items objectAtIndex:i];
+        BOOL keep = pinterestFixIsTypedItem(item, nil);
+
+        if (!keep && !typedItems) {
+            typedItems = [NSMutableArray arrayWithArray:[items subarrayWithRange:NSMakeRange(0, i)]];
+        }
+        if (keep && typedItems) {
+            [typedItems addObject:item];
+        }
+    }
+    return typedItems ?: items;
+}
+
+static id pinterestFixSearchResultsWithTypes(id results) {
+    if ([results isKindOfClass:[NSArray class]]) {
+        return pinterestFixTypedItems(results);
+    }
+
+    if (![results isKindOfClass:[NSDictionary class]]) {
+        return results;
+    }
+
+    NSMutableDictionary *mapped = nil;
+    for (id key in [results allKeys]) {
+        id value = [results objectForKey:key];
+        if (![value isKindOfClass:[NSArray class]]) {
+            continue;
+        }
+
+        NSArray *typedItems = pinterestFixTypedItems(value);
+        if (typedItems != value) {
+            if (!mapped) {
+                mapped = [results mutableCopy];
+            }
+            [mapped setObject:typedItems forKey:key];
+        }
+    }
+    return mapped ?: results;
+}
+
+
 static NSString *pinterestFixPinIdForCommentsURL(NSURL *url) {
     NSArray *components = [[url path] componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
     components = [components filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]];
@@ -603,6 +650,15 @@ static BOOL pinterestFixIsTrackingURL(NSURL *url) {
     }
 
     %orig(reactPath, parameters, success, failure);
+}
+
+%end
+
+
+%hook CBLSearchResultProvider
+
+- (id)generateModels:(id)results {
+    return %orig(pinterestFixSearchResultsWithTypes(results));
 }
 
 %end
