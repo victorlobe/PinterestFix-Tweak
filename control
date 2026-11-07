@@ -1,6 +1,6 @@
 Package: com.victorlobe.pinterestfix
 Name: PinterestFix
-Version: 2.0.1
+Version: 2.0.2
 Architecture: iphoneos-arm
 Description: Fixes Pinterest on iOS 5+
 Maintainer: Victor <contact@victorlobe.me>

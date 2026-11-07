@@ -677,6 +677,10 @@ static BOOL pinterestFixIsTrackingURL(NSURL *url) {
         result = pinterestFixUsersFromReactions(result);
     } else if ([endpoint isEqual:@"v3_get_aggregated_pin_data_comments"]) {
         result = pinterestFixCommentsFromAggregatedComments(result);
+    } else if ([endpoint isEqual:@"v3_notification_unseen_count"] && [[result objectForKey:@"data"] isKindOfClass:[NSNull class]]) {
+        NSMutableDictionary *count = [result mutableCopy];
+        [count setObject:@0 forKey:@"data"];
+        result = count;
     }
 
     return pinterestFixMapResponse(result);

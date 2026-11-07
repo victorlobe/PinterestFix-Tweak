@@ -1,5 +1,5 @@
 ARCHS = armv7 arm64
-TARGET := iphone:7.1
+TARGET := iphone:7.1:5.0
 
 INSTALL_TARGET_PROCESSES = Pinterest
 
