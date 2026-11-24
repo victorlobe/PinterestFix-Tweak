@@ -60,6 +60,9 @@ The "Likes" tab on your profile stays empty, since Pinterest no longer keeps a l
 
 ## Changelog
 
+### v2.0.3
+- Added a package icon.
+
 ### v2.0.2
 - This update fixes PinterestFix on iOS 5.
 
